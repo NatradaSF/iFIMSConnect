@@ -1,14 +1,21 @@
 {
+  "adid" : "D",
   "fieldsNotNull" : [ ],
   "hopo" : "BKK",
   "lstFidsCcatab" : [ {
-    "ckba" : "20250609000000",
-    "ckbs" : "20250609000000",
-    "ckea" : "20250609120500",
-    "ckes" : "20250609120500",
-    "ckic" : "D11",
+    "act3" : "THA",
+    "ckba" : "",
+    "ckbs" : "20260905000000",
+    "ckea" : "",
+    "ckes" : "20260905180000",
+    "ckic" : "H03",
+    "ckit" : "1",
     "ctyp" : "C",
-    "flno" : "PG       ",
-    "flnu" : 1004032057
+    "disp" : "",
+    "flno" : "TG       ",
+    "flnu" : 1005028745,
+    "lstu" : "20260903164556",
+    "usec" : "day",
+    "useu" : "day"
   } ]
 }

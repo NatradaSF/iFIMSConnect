@@ -44,23 +44,25 @@ public class FidsCcatabService {
 				fidsCcatab.setFlnu(ccatab.getFlnu()!=null?ccatab.getFlnu():fidsAfttab.getUrno());
 				fidsCcatab.setCkic(String.format("%-5s", ccatab.getCkic()));
 				log.info("CKIC : "+ccatab.getCkic());
+				boolean isCtype = "C".equals(ccatab.getCtyp());
 //				deleteCcatab(fidsCcatab);
 				
-				fidsCcatab.setFlno(fidsAfttab.getFlno());
+				fidsCcatab.setFlno(isCtype?ccatab.getFlno():fidsAfttab.getFlno());
 				fidsCcatab.setHopo(fidsAfttab.getHopo());
-				fidsCcatab.setAct3(fidsAfttab.getAct3());
+				fidsCcatab.setAct3(isCtype?ccatab.getAct3():fidsAfttab.getAct3());
 				fidsCcatab.setStod(fidsAfttab.getStod());
-				fidsCcatab.setLstu(fidsAfttab.getLstu());
+				fidsCcatab.setLstu(isCtype?ccatab.getLstu():fidsAfttab.getLstu());
 				fidsCcatab.setCdat(fidsAfttab.getCdat());
 				fidsCcatab.setPrfl(fidsAfttab.getPrfl());
 				fidsCcatab.setStat(fidsAfttab.getStat());
-				fidsCcatab.setUsec(fidsAfttab.getUsec());
-				fidsCcatab.setUseu(fidsAfttab.getUseu());
-				fidsCcatab.setCtyp(ccatab.getCtyp().equals("C")?"C":" ");
+				fidsCcatab.setUsec(isCtype?ccatab.getUsec():fidsAfttab.getUsec());
+				fidsCcatab.setUseu(isCtype?ccatab.getUsec():fidsAfttab.getUseu());
+				fidsCcatab.setCtyp(isCtype?"C":" ");
 				fidsCcatab.setCkbs(ccatab.getCkbs());
 			    fidsCcatab.setCkes(ccatab.getCkes());
 			    fidsCcatab.setCkba(ccatab.getCkba());
 			    fidsCcatab.setCkea(ccatab.getCkea());
+				fidsCcatab.setCkit(ccatab.getCkit());
 				saveFidsCcatab(fidsCcatab);
 			}
 		}

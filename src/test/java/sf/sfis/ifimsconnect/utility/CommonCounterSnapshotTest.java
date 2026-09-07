@@ -42,7 +42,7 @@ class CommonCounterSnapshotTest {
 	private static TranformFidsAfttab transformer;
 	private static ObjectMapper mapper;
 
-	/* @BeforeAll
+	@BeforeAll
 	static void setUp() throws Exception {
 		sampleXml = new String(Files.readAllBytes(SAMPLE), StandardCharsets.UTF_8);
 
@@ -61,6 +61,8 @@ class CommonCounterSnapshotTest {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 	}
 
+	
+
 	@Test
 	@DisplayName("DATASET common counter (adid=D) produces hopo + counter list, matches snapshot")
 	void counterDeparture() throws Exception {
@@ -68,9 +70,17 @@ class CommonCounterSnapshotTest {
 
 		assertThat(result).isNotNull();
 		assertThat(result.getHopo()).isEqualTo("BKK");
-		assertThat(result.getLstFidsCcatab())
-				.as("common counter list should be populated from pl_desk")
-				.isNotEmpty();
+		assertThat(result.getLstFidsCcatab()).isNotEmpty();
+
+		// ----------------------------------------------------
+		// XPath อ่านค่า pl_desk ได้จริง
+		// ----------------------------------------------------
+		var firstCounter = result.getLstFidsCcatab().get(0);
+		assertThat(firstCounter.getFlno())
+				.as("Flno must not be empty space due to wrong XPath")
+				.isNotBlank();
+		assertThat(firstCounter.getCtyp()).isNotNull();
+		assertThat(firstCounter.getAct3()).isNotBlank();
 
 		verifySnapshot("counter-departure", result);
 	}
@@ -101,5 +111,5 @@ class CommonCounterSnapshotTest {
 				.as("Snapshot '%s' changed: transform output differs from the committed golden file (%s). "
 						+ "If this change is intentional, delete that file and re-run to regenerate.", name, golden)
 				.isEqualTo(expected);
-	} */
+	}
 }

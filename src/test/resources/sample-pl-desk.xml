@@ -1,150 +1,144 @@
-<soap-env:Envelope
-  xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:aodb="urn:com.tsystems.ac.aodb"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <soap-env:Header>
-    <aodb:control>
-      <aodb:message-id>appintegration:142db5bf:197674ddd7c:-7a0e</aodb:message-id>
-      <aodb:message-version>1.4</aodb:message-version>
-      <aodb:message-type>DATASET</aodb:message-type>
-      <aodb:correlation-id>localhost:2d970033:195f1193a55:-12d5</aodb:correlation-id>
-      <aodb:timestamp>2025-06-13T07:18:48.615</aodb:timestamp>
-      <aodb:sender>aodb</aodb:sender>
-      <aodb:station>BKK</aodb:station>
-    </aodb:control>
-  </soap-env:Header>
-  <soap-env:Body>
-    <pl_desk id="1004032057">
-      <pdk_idseq>1004032057</pdk_idseq>
-      <pdk_beginactual>2025-06-09T00:00:00Z</pdk_beginactual>
-      <pdk_beginplan>2025-06-09T00:00:00Z</pdk_beginplan>
-      <pdk_cciind>Y</pdk_cciind>
-      <pdk_checkinclassid xsi:nil="true"/>
-      <pdk_checkintype>R</pdk_checkintype>
-      <pdk_createtime>2025-06-07T16:42:04Z</pdk_createtime>
-      <pdk_displaycode>P</pdk_displaycode>
-      <pdk_endactual>2025-06-09T12:05:00Z</pdk_endactual>
-      <pdk_endplan>2025-06-09T12:05:00Z</pdk_endplan>
-      <pdk_lockind>N</pdk_lockind>
-      <pdk_modtime>2025-06-09T12:05:41Z</pdk_modtime>
-      <pdk_moduser>auto</pdk_moduser>
-      <pdk_note xsi:nil="true"/>
-      <pdk_pd_departure xsi:nil="true"/>
-      <pdk_pd_flightnumber xsi:nil="true"/>
-      <pdk_pday_day xsi:nil="true"/>
-      <pdk_publiccomment xsi:nil="true"/>
-      <pdk_rcnt_counter>D11</pdk_rcnt_counter>
-      <pdk_rcnt_lastcounter xsi:nil="true"/>
-      <pdk_rcnt_mastercci>PG_COMMON</pdk_rcnt_mastercci>
-      <pdk_rcnt_refcounter>D11@1
-        <ref_counter>
-          <rcnt_baggagebeltind>N</rcnt_baggagebeltind>
-          <rcnt_baggagebeltlocation xsi:nil="true"/>
-          <rcnt_baggagetagprinterind>N</rcnt_baggagetagprinterind>
-          <rcnt_capacity xsi:nil="true"/>
-          <rcnt_ccialternatetext xsi:nil="true"/>
-          <rcnt_cctvstream xsi:nil="true"/>
-          <rcnt_code>D11</rcnt_code>
-          <rcnt_countergroup xsi:nil="true"/>
-          <rcnt_createtime>2025-04-16T10:32:28Z</rcnt_createtime>
-          <rcnt_cuteequipmentind>N</rcnt_cuteequipmentind>
-          <rcnt_description>Counter/Desk D11</rcnt_description>
-          <rcnt_displaytext xsi:nil="true"/>
-          <rcnt_externalcode xsi:nil="true"/>
-          <rcnt_idcode>D11@1</rcnt_idcode>
-          <rcnt_leasedind>N</rcnt_leasedind>
-          <rcnt_modtime>2025-04-16T10:32:28Z</rcnt_modtime>
-          <rcnt_moduser>loaded</rcnt_moduser>
-          <rcnt_ownerofcheckinset xsi:nil="true"/>
-          <rcnt_phone xsi:nil="true"/>
-          <rcnt_publiccomment xsi:nil="true"/>
-          <rcnt_ral_airline xsi:nil="true"/>
-          <rcnt_rbhs_area xsi:nil="true"/>
-          <rcnt_rcna_area xsi:nil="true"/>
-          <rcnt_rco_concourse xsi:nil="true"/>
-          <rcnt_rco_refconcourse xsi:nil="true"/>
-          <rcnt_rcpa_areasecurity xsi:nil="true"/>
-          <rcnt_rctt_countrytype>A</rcnt_rctt_countrytype>
-          <rcnt_renter xsi:nil="true"/>
-          <rcnt_rmsc_scenario>1</rcnt_rmsc_scenario>
-          <rcnt_schedulecharterind xsi:nil="true"/>
-          <rcnt_ticketprinterind>N</rcnt_ticketprinterind>
-          <rcnt_type>R</rcnt_type>
-          <rcnt_validfrom xsi:nil="true"/>
-          <rcnt_validto xsi:nil="true"/>
-        </ref_counter>
-      </pdk_rcnt_refcounter>
-      <pdk_rcnt_refmastercci>PG_COMMON@1
-        <ref_counter>
-          <rcnt_baggagebeltind>N</rcnt_baggagebeltind>
-          <rcnt_baggagebeltlocation xsi:nil="true"/>
-          <rcnt_baggagetagprinterind>N</rcnt_baggagetagprinterind>
-          <rcnt_capacity>20</rcnt_capacity>
-          <rcnt_ccialternatetext xsi:nil="true"/>
-          <rcnt_cctvstream xsi:nil="true"/>
-          <rcnt_code>PG_COMMON</rcnt_code>
-          <rcnt_countergroup xsi:nil="true"/>
-          <rcnt_createtime>2025-06-02T16:37:27Z</rcnt_createtime>
-          <rcnt_cuteequipmentind>N</rcnt_cuteequipmentind>
-          <rcnt_description>Counter/Desk PG_COMMON</rcnt_description>
-          <rcnt_displaytext xsi:nil="true"/>
-          <rcnt_externalcode xsi:nil="true"/>
-          <rcnt_idcode>PG_COMMON@1</rcnt_idcode>
-          <rcnt_leasedind>N</rcnt_leasedind>
-          <rcnt_modtime>2025-06-02T16:41:27Z</rcnt_modtime>
-          <rcnt_moduser>admin</rcnt_moduser>
-          <rcnt_ownerofcheckinset xsi:nil="true"/>
-          <rcnt_phone xsi:nil="true"/>
-          <rcnt_publiccomment xsi:nil="true"/>
-          <rcnt_ral_airline>PG
-            <ref_airline>
-              <ral_2lc>PG</ral_2lc>
-              <ral_3lc>BKP</ral_3lc>
-              <ral_alliance xsi:nil="true"/>
-              <ral_callsign>BANGKOK AIR</ral_callsign>
-              <ral_category xsi:nil="true"/>
-              <ral_createtime>2025-04-16T09:19:44Z</ral_createtime>
-              <ral_description>DOC 8585 EDT185/CA</ral_description>
-              <ral_formatflightnumberind>Y</ral_formatflightnumberind>
-              <ral_ignorecreatedayind>N</ral_ignorecreatedayind>
-              <ral_ignorestatisticsind>N</ral_ignorestatisticsind>
-              <ral_internal>PG</ral_internal>
-              <ral_lpccode>&#13;</ral_lpccode>
-              <ral_modtime>2025-04-16T09:19:44Z</ral_modtime>
-              <ral_moduser>loaded</ral_moduser>
-              <ral_name>BANGKOK AIRWAYS</ral_name>
-              <ral_opscreatedind>N</ral_opscreatedind>
-              <ral_paymentmode>I</ral_paymentmode>
-              <ral_rctr_country>TH</ral_rctr_country>
-              <ral_registrationcopyind>Y</ral_registrationcopyind>
-              <ral_rha_agentbag xsi:nil="true"/>
-              <ral_rha_agentci xsi:nil="true"/>
-              <ral_rtrm_terminal xsi:nil="true"/>
-            </ref_airline>
-          </rcnt_ral_airline>
-          <rcnt_rbhs_area xsi:nil="true"/>
-          <rcnt_rcna_area xsi:nil="true"/>
-          <rcnt_rco_concourse>1A</rcnt_rco_concourse>
-          <rcnt_rco_refconcourse xsi:nil="true"/>
-          <rcnt_rcpa_areasecurity xsi:nil="true"/>
-          <rcnt_rctt_countrytype>A</rcnt_rctt_countrytype>
-          <rcnt_renter xsi:nil="true"/>
-          <rcnt_rmsc_scenario>1</rcnt_rmsc_scenario>
-          <rcnt_schedulecharterind xsi:nil="true"/>
-          <rcnt_ticketprinterind>N</rcnt_ticketprinterind>
-          <rcnt_type>C</rcnt_type>
-          <rcnt_validfrom>2022-01-01T00:00:00Z</rcnt_validfrom>
-          <rcnt_validto xsi:nil="true"/>
-        </ref_counter>
-      </pdk_rcnt_refmastercci>
-      <pdk_rcnt_standardcounter xsi:nil="true"/>
-      <pdk_rdo_displayobject>
-        <ref_displayobject/>
-      </pdk_rdo_displayobject>
-      <pdk_rdt_displaytext xsi:nil="true"/>
-      <pdk_rmsc_scenario>1</pdk_rmsc_scenario>
-      <pdk_seqno>1</pdk_seqno>
-      <pdk_status>E</pdk_status>
-    </pl_desk>
-  </soap-env:Body>
+<soap-env:Envelope xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/" xmlns:aodb="urn:com.tsystems.ac.aodb" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soap-env:Header>
+		<aodb:control>
+			<aodb:message-id>appintegration:32681ca1:1a05ddb6c56:5aa1</aodb:message-id>
+			<aodb:message-version>1.4</aodb:message-version>
+			<aodb:message-type>DATASET</aodb:message-type>
+			<aodb:correlation-id>appintegration:32681ca1:1a05ddb6c56:5a86</aodb:correlation-id>
+			<aodb:timestamp>2026-09-03T17:00:05.288</aodb:timestamp>
+			<aodb:sender>aodb</aodb:sender>
+			<aodb:station>BKK</aodb:station>
+		</aodb:control>
+	</soap-env:Header>
+	<soap-env:Body>
+		<pl_desk id="1005028745">
+			<pdk_idseq>1005028745</pdk_idseq>
+			<pdk_beginactual xsi:nil="true"/>
+			<pdk_beginplan>2026-09-05T00:00:00Z</pdk_beginplan>
+			<pdk_cciind>N</pdk_cciind>
+			<pdk_checkinclassid xsi:nil="true"/>
+			<pdk_checkintype>R</pdk_checkintype>
+			<pdk_createtime>2026-09-03T16:45:56Z</pdk_createtime>
+			<pdk_displaycode>P</pdk_displaycode>
+			<pdk_endactual xsi:nil="true"/>
+			<pdk_endplan>2026-09-05T18:00:00Z</pdk_endplan>
+			<pdk_lockind>N</pdk_lockind>
+			<pdk_modtime>2026-09-03T16:45:56Z</pdk_modtime>
+			<pdk_moduser>day</pdk_moduser>
+			<pdk_note xsi:nil="true"/>
+			<pdk_pd_departure xsi:nil="true"/>
+			<pdk_pd_flightnumber xsi:nil="true"/>
+			<pdk_pday_day xsi:nil="true"/>
+			<pdk_publiccomment xsi:nil="true"/>
+			<pdk_rcnt_counter>H03</pdk_rcnt_counter>
+			<pdk_rcnt_lastcounter xsi:nil="true"/>
+			<pdk_rcnt_mastercci>TG_COMMON</pdk_rcnt_mastercci>
+			<pdk_rcnt_refcounter>H03@1<ref_counter>
+					<rcnt_baggagebeltind>N</rcnt_baggagebeltind>
+					<rcnt_baggagebeltlocation xsi:nil="true"/>
+					<rcnt_baggagetagprinterind>N</rcnt_baggagetagprinterind>
+					<rcnt_capacity>1</rcnt_capacity>
+					<rcnt_ccialternatetext xsi:nil="true"/>
+					<rcnt_cctvstream xsi:nil="true"/>
+					<rcnt_code>H03</rcnt_code>
+					<rcnt_countergroup xsi:nil="true"/>
+					<rcnt_createtime>2025-04-16T10:32:28Z</rcnt_createtime>
+					<rcnt_cuteequipmentind>N</rcnt_cuteequipmentind>
+					<rcnt_description>Counter/Desk H03</rcnt_description>
+					<rcnt_displaytext xsi:nil="true"/>
+					<rcnt_externalcode xsi:nil="true"/>
+					<rcnt_idcode>H03@1</rcnt_idcode>
+					<rcnt_leasedind>N</rcnt_leasedind>
+					<rcnt_modtime>2025-11-15T13:54:07Z</rcnt_modtime>
+					<rcnt_moduser>sfis</rcnt_moduser>
+					<rcnt_ownerofcheckinset xsi:nil="true"/>
+					<rcnt_phone xsi:nil="true"/>
+					<rcnt_publiccomment xsi:nil="true"/>
+					<rcnt_ral_airline xsi:nil="true"/>
+					<rcnt_rbhs_area xsi:nil="true"/>
+					<rcnt_rcna_area xsi:nil="true"/>
+					<rcnt_rco_concourse>1</rcnt_rco_concourse>
+					<rcnt_rco_refconcourse>1@1</rcnt_rco_refconcourse>
+					<rcnt_rcpa_areasecurity xsi:nil="true"/>
+					<rcnt_rctt_countrytype>A</rcnt_rctt_countrytype>
+					<rcnt_renter xsi:nil="true"/>
+					<rcnt_rmsc_scenario>1</rcnt_rmsc_scenario>
+					<rcnt_schedulecharterind xsi:nil="true"/>
+					<rcnt_ticketprinterind>N</rcnt_ticketprinterind>
+					<rcnt_type>R</rcnt_type>
+					<rcnt_validfrom>2025-04-30T17:00:00Z</rcnt_validfrom>
+					<rcnt_validto xsi:nil="true"/>
+				</ref_counter>
+			</pdk_rcnt_refcounter>
+			<pdk_rcnt_refmastercci>TG_COMMON@1<ref_counter>
+					<rcnt_baggagebeltind>N</rcnt_baggagebeltind>
+					<rcnt_baggagebeltlocation xsi:nil="true"/>
+					<rcnt_baggagetagprinterind>N</rcnt_baggagetagprinterind>
+					<rcnt_capacity>50</rcnt_capacity>
+					<rcnt_ccialternatetext xsi:nil="true"/>
+					<rcnt_cctvstream xsi:nil="true"/>
+					<rcnt_code>TG_COMMON</rcnt_code>
+					<rcnt_countergroup xsi:nil="true"/>
+					<rcnt_createtime>2025-06-02T14:21:54Z</rcnt_createtime>
+					<rcnt_cuteequipmentind>N</rcnt_cuteequipmentind>
+					<rcnt_description>Counter/Desk TG_COMMON</rcnt_description>
+					<rcnt_displaytext xsi:nil="true"/>
+					<rcnt_externalcode xsi:nil="true"/>
+					<rcnt_idcode>TG_COMMON@1</rcnt_idcode>
+					<rcnt_leasedind>N</rcnt_leasedind>
+					<rcnt_modtime>2026-08-26T06:13:47Z</rcnt_modtime>
+					<rcnt_moduser>admin</rcnt_moduser>
+					<rcnt_ownerofcheckinset xsi:nil="true"/>
+					<rcnt_phone xsi:nil="true"/>
+					<rcnt_publiccomment xsi:nil="true"/>
+					<rcnt_ral_airline>TG<ref_airline>
+							<ral_2lc>TG</ral_2lc>
+							<ral_3lc>THA</ral_3lc>
+							<ral_alliance xsi:nil="true"/>
+							<ral_callsign>THAI</ral_callsign>
+							<ral_category xsi:nil="true"/>
+							<ral_createtime>2025-04-16T09:19:45Z</ral_createtime>
+							<ral_description>DOC 8585 EDT 185/CA</ral_description>
+							<ral_formatflightnumberind>Y</ral_formatflightnumberind>
+							<ral_ignorecreatedayind>N</ral_ignorecreatedayind>
+							<ral_ignorestatisticsind>N</ral_ignorestatisticsind>
+							<ral_internal>TG</ral_internal>
+							<ral_lpccode>&#13;</ral_lpccode>
+							<ral_modtime>2025-04-16T09:19:45Z</ral_modtime>
+							<ral_moduser>loaded</ral_moduser>
+							<ral_name>THAI AIRWAYS INTERNATIONAL PUBLIC CO.LTD.</ral_name>
+							<ral_opscreatedind>N</ral_opscreatedind>
+							<ral_paymentmode>I</ral_paymentmode>
+							<ral_rctr_country>TH</ral_rctr_country>
+							<ral_registrationcopyind>Y</ral_registrationcopyind>
+							<ral_rha_agentbag xsi:nil="true"/>
+							<ral_rha_agentci xsi:nil="true"/>
+							<ral_rtrm_terminal xsi:nil="true"/>
+						</ref_airline>
+					</rcnt_ral_airline>
+					<rcnt_rbhs_area xsi:nil="true"/>
+					<rcnt_rcna_area xsi:nil="true"/>
+					<rcnt_rco_concourse>1A</rcnt_rco_concourse>
+					<rcnt_rco_refconcourse xsi:nil="true"/>
+					<rcnt_rcpa_areasecurity xsi:nil="true"/>
+					<rcnt_rctt_countrytype>A</rcnt_rctt_countrytype>
+					<rcnt_renter xsi:nil="true"/>
+					<rcnt_rmsc_scenario>1</rcnt_rmsc_scenario>
+					<rcnt_schedulecharterind xsi:nil="true"/>
+					<rcnt_ticketprinterind>N</rcnt_ticketprinterind>
+					<rcnt_type>C</rcnt_type>
+					<rcnt_validfrom>2022-01-01T00:00:00Z</rcnt_validfrom>
+					<rcnt_validto xsi:nil="true"/>
+				</ref_counter>
+			</pdk_rcnt_refmastercci>
+			<pdk_rcnt_standardcounter xsi:nil="true"/>
+			<pdk_rdo_displayobject>
+				<ref_displayobject/>
+			</pdk_rdo_displayobject>
+			<pdk_rdt_displaytext xsi:nil="true"/>
+			<pdk_rmsc_scenario>1</pdk_rmsc_scenario>
+			<pdk_seqno>1</pdk_seqno>
+			<pdk_status>S</pdk_status>
+		</pl_desk>
+	</soap-env:Body>
 </soap-env:Envelope>

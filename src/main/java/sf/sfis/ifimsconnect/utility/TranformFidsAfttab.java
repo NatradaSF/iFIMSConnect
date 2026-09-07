@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -17,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -102,7 +100,7 @@ public class TranformFidsAfttab {
 			boolean hasDeparture = !((String) xpath.evaluate("//pd_idseq", doc, XPathConstants.STRING)).isEmpty();
 
 			if (plTurn.isEmpty()) {
-				return buildCommonCounter(doc, hopo, adid);
+				return buildCommonCounter(xmlString, actionType, hopo, adid, originator);
 			}
 			return buildFlight(xmlString, doc, xpath, actionType, hopo, adid, hasArrival, hasDeparture, originator);
 		} catch (Exception e) {
@@ -112,16 +110,38 @@ public class TranformFidsAfttab {
 	}
 
 	// ─── COMMON COUNTER (XML without pl_turn) ──────────────────────────────
-	private FidsAfttab buildCommonCounter(Document doc, String hopo, String adid) {
+	private FidsAfttab buildCommonCounter(String xmlString, String actionType, String hopo, String adid, String originator) {
 		if (!"D".equalsIgnoreCase(adid))
 			return null;
-		FidsAfttab f = new FidsAfttab();
+
+		try {
+			// 1. ส่ง XML เข้า XSLT เพื่อ Map ลง DTO โดยตรง
+			FidsAfttab f = transformUsingSaxon(xmlString, actionType, adid, originator);
+			if (f == null) {
+				return null;
+			}
+
+			f.setHopo(hopo);
+			f.setAdid(adid);
+
+			// 2. จัดการ Format ฟิลด์เพิ่มเติมและกรอง HOLD ออกจาก Counter List
+			if (f.getLstFidsCcatab() != null && !f.getLstFidsCcatab().isEmpty()) {
+				f.setLstFidsCcatab(getCountersCommon(f.getLstFidsCcatab()));
+			}
+
+			return f;
+		} catch (Exception e) {
+			log.error("buildCommonCounter error: ", e);
+			return null;
+		}
+		/* FidsAfttab f = new FidsAfttab();
 		f.setHopo(hopo);
 		NodeList counterList = doc.getElementsByTagName("pl_desk");
 		if (counterList.getLength() > 0) {
-			f.setLstFidsCcatab(getCountersOld((Element) counterList.item(0), true));
+			//f.setLstFidsCcatab(getCounters(f.getLstFidsCcatab(), f.getCounter(), f.getFlno(), actionType));
+			f.setLstFidsCcatab(getCountersCommon((Element) counterList.item(0), true));
 		}
-		return f;
+		return f; */
 	}
 
 	// ─── FLIGHT MODE ───────────────────────────────────────────────────────
@@ -497,12 +517,12 @@ public class TranformFidsAfttab {
 				f.setFtyp("S");
 				updatedFields.add("ftyp");
 				return;
-			} else { //IBK,OBK,RDY,FNL,ARR,DEP,GHS
-				f.setFtyp("O");
-				updatedFields.add("ftyp");
-				return;
-			}
+			} 
 		}
+
+		//IBK,OBK,RDY,FNL,ARR,DEP,GHS
+		f.setFtyp("O");
+		updatedFields.add("ftyp");
 	}
 
 	private void applyAirportLookup(FidsAfttab f, String hopo, boolean isArrival) {
@@ -555,7 +575,7 @@ public class TranformFidsAfttab {
 		if (f.getLstRouting() != null) {
 			for (FidsAfttab.Routing item : f.getLstRouting()) {
 				if (item.getIata() != null && !item.getIata().isEmpty()) {
-					iataToIcao.put(item.getIata(), item.getIcao() == null ? "" : item.getIcao());
+					iataToIcao.put(item.getIata(), Optional.ofNullable(item.getIcao()).orElse(""));
 				}
 				String act = item.getAction();
 				if ("update".equalsIgnoreCase(act) || "insert".equalsIgnoreCase(act)) {
@@ -875,7 +895,24 @@ public class TranformFidsAfttab {
 		return lst;
 	}
 
-	private List<FidsCcatab> getCountersOld(Element element, boolean isCommon) {
+	private List<FidsCcatab> getCountersCommon(List<FidsCcatab> rawList) {
+		if (rawList == null || rawList.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<FidsCcatab> list = new ArrayList<>();
+		for (FidsCcatab item : rawList) {
+			// 1. ดักจับกรณีเป็น HOLD ให้ข้าม
+			if (item.getCkic() != null && "HOLD".equalsIgnoreCase(item.getCkic().trim())) {
+				continue;
+			}
+
+			list.add(item);
+		}
+		return list;
+	}
+
+	/* private List<FidsCcatab> getCountersCommon(Element element, boolean isCommon) {
 		List<FidsCcatab> lst = new ArrayList<>();
 		NodeList counterNodes = isCommon
 				? new ImplementNodeList(Arrays.asList((Node) element))
@@ -886,57 +923,41 @@ public class TranformFidsAfttab {
 			FidsCcatab c = new FidsCcatab();
 			Node n = counterNodes.item(i);
 			try {
-				String ckic = convertDateStringIfNeeded(xp.evaluate("pdk_rcnt_refcounter/ref_counter/rcnt_code", n));
+				String flnu = convertDateStringIfNeeded(xp.evaluate("pdk_idseq", n));
+				String flno = convertDateStringIfNeeded(xp.evaluate(
+						"pdk_rcnt_refmastercci/ref_counter/rcnt_ral_airline/ref_airline/ral_2lc", n));
+				String ctyp = convertDateStringIfNeeded(xp.evaluate("pdk_rcnt_refmastercci/ref_counter/rcnt_type", n));
+				String ckic = convertDateStringIfNeeded(xp.evaluate("pdk_rcnt_counter", n));
 				String ckbs = convertDateStringIfNeeded(xp.evaluate("pdk_beginplan", n));
 				String ckes = convertDateStringIfNeeded(xp.evaluate("pdk_endplan", n));
 				String ckba = convertDateStringIfNeeded(xp.evaluate("pdk_beginactual", n));
 				String ckea = convertDateStringIfNeeded(xp.evaluate("pdk_endactual", n));
-				String ctyp = convertDateStringIfNeeded(xp.evaluate("pdk_checkintype", n));
 				String ckit = convertDateStringIfNeeded(
 						xp.evaluate("pdk_rcnt_refcounter/ref_counter/rcnt_rco_concourse", n));
 				String disp = convertDateStringIfNeeded(xp.evaluate("pdk_checkinclassid", n));
 				String act3 = convertDateStringIfNeeded(
-						xp.evaluate("pdk_rcnt_refcounter/ref_counter/rcnt_ral_airline", n));
+						xp.evaluate("pdk_rcnt_refmastercci/ref_counter/rcnt_ral_airline/ref_airline/ral_3lc", n));
 				if ("HOLD".equals(ckic))
 					continue;
 
-				if (!isCommon) {
-					ctyp = ctyp.equals("C") ? ctyp : " ";
-					if (ctyp.equals(" ")) {
-						c.setCkic(ckic);
-						c.setCtyp(ctyp);
-						c.setCkbs(ckbs);
-						c.setCkes(ckes);
-						c.setCkba(ckba);
-						c.setCkea(ckea);
-						c.setCkit(ckit);
-						c.setDisp(disp);
-						c.setAct3(act3);
-						lst.add(c);
-					}
-				} else {
-					String flnu = convertDateStringIfNeeded(xp.evaluate("pdk_idseq", n));
-					String flno = convertDateStringIfNeeded(xp.evaluate(
-							"pdk_rcnt_refcounter/ref_counter/rcnt_ral_airline", n));
-					c.setFlnu(new BigDecimal(flnu));
-					c.setFlno(String.format("%-9s", flno));
-					c.setCkic(ckic);
-					c.setCtyp("C");
-					c.setCkbs(ckbs);
-					c.setCkes(ckes);
-					c.setCkba(ckba);
-					c.setCkea(ckea);
-					c.setCkit(ckit);
-					c.setDisp(disp);
-					c.setAct3(act3);
-					lst.add(c);
-				}
+				c.setFlnu(new BigDecimal(flnu));
+				c.setFlno(String.format("%-9s", flno));
+				c.setCtyp(ctyp);
+				c.setCkic(ckic);
+				c.setCkbs(ckbs);
+				c.setCkes(ckes);
+				c.setCkba(ckba);
+				c.setCkea(ckea);
+				c.setCkit(ckit);
+				c.setDisp(disp);
+				c.setAct3(act3);
+				lst.add(c);
 			} catch (XPathExpressionException e) {
 				log.error("getCounters error: ", e);
 			}
 		}
 		return lst;
-	}
+	} */
 
 	// ─── HELPERS ───────────────────────────────────────────────────────────
 	private Document parseDocument(String xmlString) throws Exception {
@@ -969,7 +990,6 @@ public class TranformFidsAfttab {
 	 * หลัก + อักษร 0-1 ตัว")
 	 */
 	public Map<String, String> parseFlightNumber(String flightNumber) {
-		System.out.println(flightNumber.length());
 		if (flightNumber == null || flightNumber.length() < 3) {
 			return Collections.emptyMap();
 		}
