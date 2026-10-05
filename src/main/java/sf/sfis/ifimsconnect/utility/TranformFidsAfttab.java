@@ -247,8 +247,7 @@ public class TranformFidsAfttab {
 		// 4. VIA from routing
 		// applyVial(f, xpath, doc, flightElement, hopo, isArrival, actionType);
 		applyVial(f, hopo, isArrival, actionType);
-
-		applyFtyp(f, actionType);
+		applyFtyp(f);
 		applyFlightNumber(f);
 		// applyTrkn(f); ทำใน XSL
 
@@ -476,7 +475,6 @@ public class TranformFidsAfttab {
 		if (updatedFields.contains("flno")) {
 			updatedFields.add("flns");
 			updatedFields.add("fltn");
-			updatedFields.add("csgn");
 		}
 
 		if (updatedFields.contains("jfno")) {
@@ -484,7 +482,48 @@ public class TranformFidsAfttab {
 		}
 	}
 
-	private void applyFtyp(FidsAfttab f, String actionType) {
+	private void applyFtyp(FidsAfttab f) {
+		String ftyp = f.getFtyp();
+		//ถ้าเป็น Towing FTYP=T 
+		if ("T".equalsIgnoreCase(ftyp)) {
+			return;
+		}
+
+		//ถ้าไม่เป็น Towing เช็ค REMP ถ้าเป็น RFT FTYP=B
+		if (f.getRem1() != null) {
+			if ("RFT".equalsIgnoreCase(f.getRem1())) {
+				f.setFtyp("B");
+				return;
+			}else if ("RFA".equalsIgnoreCase(f.getRem1())) {
+				f.setFtyp("Z");
+				return;
+			}else if ("DIV".equalsIgnoreCase(f.getRem1()) || "DIVO".equalsIgnoreCase(f.getRem1())) {
+				f.setFtyp("D");
+				return;
+			}else if ("NOOP".equalsIgnoreCase(f.getRem1())) {
+				f.setFtyp("N");
+				return;
+			}
+		}
+
+		//ถ้าไม่เป็น return flight,return taxi,cancel flight,divert flight เช็ค REM1
+		if (f.getRemp() != null) {
+			if ("PLN".equalsIgnoreCase(f.getRemp())) {
+				f.setFtyp("S");
+				return;
+			}else if ("CNL".equalsIgnoreCase(f.getRemp())) {
+				f.setFtyp("X");
+				return;
+			}
+		}
+
+		if (f.getRem1() != null || f.getRemp() != null) {
+			//IBK,OBK,RDY,FNL,ARR,DEP,GHS
+			f.setFtyp("O");
+		}
+	}
+
+	/* private void applyFtyp(FidsAfttab f, String actionType) {
 		List<String> updatedFields = f.getFieldsNotNull(); // รายชื่อแท็กที่มี action UPDATE/INSERT จริง
 		if (updatedFields == null) {
 			updatedFields = new ArrayList<>();
@@ -498,32 +537,32 @@ public class TranformFidsAfttab {
 			return;
 		}
 
-		//ถ้าไม่เป็น Towing เช็ค REM1 ถ้าเป็น RFT FTYP=B
-		if ((isDataset || updatedFields.contains("rem1")) && f.getRem1() != null) {
-			if ("RFT".equalsIgnoreCase(f.getRem1())) {
+		//ถ้าไม่เป็น Towing เช็ค REMP ถ้าเป็น RFT FTYP=B
+		if ((isDataset || updatedFields.contains("remp")) && f.getRemp() != null) {
+			if ("RFT".equalsIgnoreCase(f.getRemp())) {
 				f.setFtyp("B");
 				updatedFields.add("ftyp");
 				return;
-			}else if ("RFA".equalsIgnoreCase(f.getRem1())) {
+			}else if ("RFA".equalsIgnoreCase(f.getRemp())) {
 				f.setFtyp("Z");
 				updatedFields.add("ftyp");
 				return;
 			}
 		}
 
-		//ถ้าไม่เป็น return flight,return taxi,cancel flight,divert flight เช็ค REMP
-		if ((isDataset || updatedFields.contains("remp")) && f.getRemp() != null) {
-			if ("PLN".equalsIgnoreCase(f.getRemp())) {
+		//ถ้าไม่เป็น return flight,return taxi,cancel flight,divert flight เช็ค REM1
+		if ((isDataset || updatedFields.contains("rem1")) && f.getRem1() != null) {
+			if ("PLN".equalsIgnoreCase(f.getRem1())) {
 				f.setFtyp("S");
 				updatedFields.add("ftyp");
 				return;
+			}else {
+				//IBK,OBK,RDY,FNL,ARR,DEP,GHS
+				f.setFtyp("O");
+				updatedFields.add("ftyp");
 			} 
 		}
-
-		//IBK,OBK,RDY,FNL,ARR,DEP,GHS
-		f.setFtyp("O");
-		updatedFields.add("ftyp");
-	}
+	} */
 
 	private void applyAirportLookup(FidsAfttab f, String hopo, boolean isArrival) {
 		String apc4 = fidsAirportRepository.findById(hopo)
@@ -863,7 +902,7 @@ public class TranformFidsAfttab {
 			}
 
 			// 1. เช็ก action: ถ้าไม่มี action หรือไม่ใช่ DATASET/UPDATE/INSERT ให้ข้าม
-			if (!isDataset && !"UPDATE".equalsIgnoreCase(action) && !"INSERT".equalsIgnoreCase(action)) {
+			if (!isDataset && !"UPDATE".equalsIgnoreCase(action) && !"INSERT".equalsIgnoreCase(action) && !"DELETE".equalsIgnoreCase(action)) {
 				continue;
 			}
 
@@ -888,7 +927,9 @@ public class TranformFidsAfttab {
 					}
 				}
 			} else {
-				lst.add(item);
+				FidsCcatab fidsCcatab = new FidsCcatab();
+				BeanUtils.copyProperties(item, fidsCcatab);
+				lst.add(fidsCcatab);
 			}
 		}
 
@@ -998,7 +1039,7 @@ public class TranformFidsAfttab {
 		// \\s*   : Space คั่นกลางกี่ตัวก็ได้ (หรือไม่มีเลย)
 		// Group 2: เลขไฟลท์ 1-4 หลัก (เช่น 415, 0123)
 		// Group 3: Suffix ตัวอักษร 0-1 ตัวปิดท้าย (เช่น A, B)
-		Pattern pattern = Pattern.compile("^([A-Za-z0-9]{2}|[A-Za-z]{3})\\s*(\\d{1,5})([A-Za-z]?)$");
+		Pattern pattern = Pattern.compile("^([A-Za-z0-9]{2}|[A-Za-z]{3})\\s*(\\d{1,5})\\s*([A-Za-z]?)$");
     	Matcher m = pattern.matcher(flightNumber.trim());
 		if (!m.find()) {
 			return Collections.emptyMap();

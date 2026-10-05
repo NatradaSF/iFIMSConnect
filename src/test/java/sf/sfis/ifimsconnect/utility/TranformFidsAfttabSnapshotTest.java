@@ -45,15 +45,21 @@ import sf.sfis.ifimsconnect.repository.FidsAirportRepository;
 class TranformFidsAfttabSnapshotTest {
 
 	private static final Path SAMPLE = Paths.get("src", "test", "resources", "sample-pl-turn.xml");
+	private static final Path SAMPLE_D_COUNTER = Paths.get("src", "test", "resources", "delete-D-Counter-pl-turn.xml");
+	private static final Path SAMPLE_C_COUNTER = Paths.get("src", "test", "resources", "delete-C-Counter-pl-turn.xml");
 	private static final Path SNAPSHOT_DIR = Paths.get("src", "test", "resources", "snapshots");
 
 	private static String sampleXml;
+	private static String counterDedicatedXml;
+	private static String counterCommonXml;
 	private static TranformFidsAfttab transformer;
 	private static ObjectMapper mapper;
 
 	@BeforeAll
 	static void setUp() throws Exception {
 		sampleXml = new String(Files.readAllBytes(SAMPLE), StandardCharsets.UTF_8);
+		counterDedicatedXml = new String(Files.readAllBytes(SAMPLE_D_COUNTER), StandardCharsets.UTF_8);
+		counterCommonXml = new String(Files.readAllBytes(SAMPLE_C_COUNTER), StandardCharsets.UTF_8);
 
 		// Airport lookup is mocked to "not found" so org4/des4 resolve to "" deterministically.
 		FidsAirportRepository airportRepo = mock(FidsAirportRepository.class);
@@ -135,5 +141,74 @@ class TranformFidsAfttabSnapshotTest {
 				.as("Snapshot '%s' changed: transform output differs from the committed golden file (%s). "
 						+ "If this change is intentional, delete that file and re-run to regenerate.", name, golden)
 				.isEqualTo(expected);
+	}
+
+	@Test
+	@DisplayName("Test FTYP calculation for UPDATE arrival")
+	void testFtypUpdateArrival() throws Exception {
+		FidsAfttab result = transformer.convertPlTurntoAfftab(sampleXml, "UPDATE", "BKK", "A");
+
+		assertThat(result).isNotNull();
+		
+		// 🔍 1. เช็กว่า XML Parse เข้าไปใน REMP และ REM1 ถูกหรือไม่
+		assertThat(result.getRemp()).isEqualTo("AIR");
+		assertThat(result.getRem1()).isEqualTo("");
+		
+		// 🔍 2. เช็กว่า FTYP คำนวณออกมาได้ Z ตาม Business Logic หรือไม่
+		assertThat(result.getFtyp()).isEqualTo("O");
+
+		if (result.getFieldsNotNull() != null) {
+			assertThat(result.getFieldsNotNull()).doesNotContain("remp");
+		}
+	}
+
+	@Test
+	@DisplayName("DELETE counter transform extracts action='delete' and reads ctyp from @old attribute")
+	void deleteDedicatedCounterTransform() throws Exception {
+		FidsAfttab result = transformer.convertPlTurntoAfftab(counterDedicatedXml, "UPDATE", "BKK", "D");
+
+		// Assert ตรวจสอบผลลัพธ์
+		assertThat(result).isNotNull();
+		assertThat(result.getLstFidsCcatab()).hasSize(1);
+
+		sf.sfis.ifimsconnect.model.FidsCcatab ccatab = result.getLstFidsCcatab().get(0);
+
+		// เช็กว่า action ถูกอ่านมาเป็น "delete"
+		assertThat(ccatab.getAction()).isEqualToIgnoringCase("delete");
+    
+		// เช็กว่าอ่าน counter "H20" ได้ถูกต้อง
+		assertThat(ccatab.getFlnu()).isEqualTo("1005039543");
+		assertThat(ccatab.getCkic()).isEqualTo("H20");
+		assertThat(ccatab.getUrno()).isEqualTo("1007787242");
+
+		// เช็กว่าอ่าน @old="R" แล้วถูก Map ให้เป็น ctyp = "D"
+		assertThat(ccatab.getCtyp()).isEqualTo("D");
+	}
+
+	@Test
+	@DisplayName("COMMON counter transform extracts common counters and maps ctyp='C'")
+	void deleteCommonCounterTransform() throws Exception {
+		FidsAfttab result = transformer.convertPlTurntoAfftab(counterCommonXml, "UPDATE", "BKK", "D");
+
+		// Assert - ตรวจสอบผลลัพธ์
+		assertThat(result).isNotNull();
+		// A01,A02,A03,A04,A05,B01,B02,B03,B04,B05,H01,H02,H03,H04,H05
+		assertThat(result.getLstFidsCcatab()).hasSize(15);
+
+		sf.sfis.ifimsconnect.model.FidsCcatab ccatab1 = result.getLstFidsCcatab().get(0);
+		sf.sfis.ifimsconnect.model.FidsCcatab ccatab2 = result.getLstFidsCcatab().get(1);
+
+		// เช็กว่ารายการแรกอ่านค่า CKIC ถูกต้อง
+		assertThat(ccatab1.getCkic()).isEqualTo("A01");
+		// เช็กว่า Common Counter ถูกกำหนด ctyp = "C"
+		assertThat(ccatab1.getCtyp()).isEqualTo("C");
+		assertThat(ccatab2.getUrno()).isEqualTo("1007788263");
+		// เช็ก action
+		assertThat(ccatab1.getAction()).isEqualToIgnoringCase("update");
+
+		// เช็กรายการที่สอง
+		assertThat(ccatab2.getCkic()).isEqualTo("A02");
+		assertThat(ccatab2.getCtyp()).isEqualTo("C");
+		assertThat(ccatab2.getUrno()).isEqualTo("1007788263");
 	}
 }

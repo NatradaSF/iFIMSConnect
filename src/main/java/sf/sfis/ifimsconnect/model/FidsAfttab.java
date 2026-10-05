@@ -2017,6 +2017,15 @@ public class FidsAfttab implements Serializable {
 	private String action;
 
 	@Transient
+	private String gateAction;
+
+	@Transient
+	private String beltAction;
+
+	@Transient
+	private String positionAction;
+
+	@Transient
 	private String toid;
 	
 	/* public void setRemp(String remp) {

@@ -50,6 +50,7 @@ public class SubscribeRequestService {
 			Control control = new Control();
 			control.setMessageVersion("1.4");
 			control.setMessageType("SUBSCRIBE");
+			control.setConfirmType("NACK");
 			control.setSender("IFIMS");
 			control.setTimestamp(currentDate);
 			Request request = new Request();
@@ -93,6 +94,7 @@ public class SubscribeRequestService {
 			Control control = new Control();
 			control.setMessageVersion("1.4");
 			control.setMessageType("DATASET");
+			control.setConfirmType("NACK");
 			control.setSender("IFIMS");
 			control.setTimestamp(currentDate);
 			Request request = new Request();
