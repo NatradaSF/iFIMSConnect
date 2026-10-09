@@ -157,7 +157,8 @@ public class ESBResponseService {
 
 			if (type.equalsIgnoreCase("UPDATE")) {// Send update fields to ESB by Web service.
 				// Arrival
-				FidsAfttab arrivalAfttab = tranformFidsAfttab.convertPlTurntoAfftab(writer.toString(), type, hopo, "A", originator);
+				FidsAfttab arrivalAfttab = tranformFidsAfttab.convertPlTurntoAfftab(writer.toString(), type, hopo, "A",
+						originator);
 				if (arrivalAfttab != null) {
 					String xmlEsb = convertFidsAfftabtoEsb(timestamp, originator, arrivalAfttab);
 					if (xmlEsb != null) {
@@ -168,18 +169,19 @@ public class ESBResponseService {
 						log.info("No data found for ESB update.");
 					}
 
-					//Send counter to Outbound UFIS_COUNTER_OUT
-					//sendCounter(timestamp, arrivalAfttab); Arrival ไม่มี Counter
-					//Send gate to Outbound UFIS_GATE_OUT
+					// Send counter to Outbound UFIS_COUNTER_OUT
+					// sendCounter(timestamp, arrivalAfttab); Arrival ไม่มี Counter
+					// Send gate to Outbound UFIS_GATE_OUT
 					sendGate(timestamp, arrivalAfttab);
-					//Send belt to Outbound UFIS_BELT_OUT
+					// Send belt to Outbound UFIS_BELT_OUT
 					sendBelt(timestamp, arrivalAfttab);
-					//Send acposition to Outbound UFIS_ACPOSITION_OUT
+					// Send acposition to Outbound UFIS_ACPOSITION_OUT
 					sendAcposition(timestamp, arrivalAfttab);
 				}
 
-				//Departure
-				FidsAfttab departureAfttab = tranformFidsAfttab.convertPlTurntoAfftab(writer.toString(), type, hopo, "D", originator);
+				// Departure
+				FidsAfttab departureAfttab = tranformFidsAfttab.convertPlTurntoAfftab(writer.toString(), type, hopo,
+						"D", originator);
 				if (departureAfttab != null) {
 					String xmlEsb = convertFidsAfftabtoEsb(timestamp, originator, departureAfttab);
 					if (xmlEsb != null) {
@@ -190,16 +192,16 @@ public class ESBResponseService {
 						log.info("No data found for ESB update.");
 					}
 
-					//Send counter to Outbound UFIS_COUNTER_OUT
+					// Send counter to Outbound UFIS_COUNTER_OUT
 					sendCounter(timestamp, departureAfttab);
-					//Send gate to Outbound UFIS_GATE_OUT
+					// Send gate to Outbound UFIS_GATE_OUT
 					sendGate(timestamp, departureAfttab);
-					//Send belt to Outbound UFIS_BELT_OUT
-					//sendBelt(timestamp, departureAfttab); Departure ไม่มี Belt
-					//Send acposition to Outbound UFIS_ACPOSITION_OUT
+					// Send belt to Outbound UFIS_BELT_OUT
+					// sendBelt(timestamp, departureAfttab); Departure ไม่มี Belt
+					// Send acposition to Outbound UFIS_ACPOSITION_OUT
 					sendAcposition(timestamp, departureAfttab);
 				}
-				
+
 				// Save data to Redis.
 				redisController.saveData(hopo);
 			} else if (!type.equalsIgnoreCase("DATASET")) {// Send ACK or NACK to ESB by Web service.
@@ -220,7 +222,7 @@ public class ESBResponseService {
 					} finally {
 						MDC.remove("sendEsbKey");
 					}
-					//callWebserviceResponse(xmlEsb);
+					// callWebserviceResponse(xmlEsb);
 					sendEmailResponse(xmlEsb, hopo);
 				} else {
 					log.info("ACK message ignored (no ESB response to send).");
@@ -287,7 +289,8 @@ public class ESBResponseService {
 		MSG esbAfttab = new MSG();
 		MSG.MSGSTREAMOUT msgstreamout = new MSGSTREAMOUT();
 		// INFOBJ_GENERIC — ใช้ helper ร่วมกับ counter/gate (แก้ logic ที่เดียว)
-		MSG.MSGSTREAMOUT.INFOBJGENERIC infobjgeneric = buildOutboundGeneric("UFISFLTUD", updateTime, fidsAfttab, fidsAfttab.getAction());
+		MSG.MSGSTREAMOUT.INFOBJGENERIC infobjgeneric = buildOutboundGeneric("UFISFLTUD", updateTime, fidsAfttab,
+				fidsAfttab.getAction());
 
 		MSG.MSGSTREAMOUT.INFOBJFLIGHT infobjflight = new INFOBJFLIGHT();
 		// Set<String> copyFields = new HashSet<>(Arrays.asList("fpla" ,"fpld", "eldt",
@@ -311,11 +314,12 @@ public class ESBResponseService {
 			infobjflight.setRTYP(fidsAfttab.getRtyp());
 			infobjflight.setFTYP(fidsAfttab.getFtyp());
 
-			//infobjflight.setFLNO(infobjflight.getFLNO() != null ? infobjflight.getFLNO().trim() : null);
+			// infobjflight.setFLNO(infobjflight.getFLNO() != null ?
+			// infobjflight.getFLNO().trim() : null);
 			infobjflight.setFLTN(infobjflight.getFLTN() != null ? infobjflight.getFLTN().trim() : null);
 			// Different field between FIDS and ESB
-			//infobjflight.setSLOT(fidsAfttab.getCtot()); ทำใน XSL
-			if(!"D".equals(fidsAfttab.getFtyp())){
+			// infobjflight.setSLOT(fidsAfttab.getCtot()); ทำใน XSL
+			if (!"D".equals(fidsAfttab.getFtyp())) {
 				infobjflight.setFLNS(null);
 			}
 
@@ -337,15 +341,18 @@ public class ESBResponseService {
 	}
 
 	/**
-	 * ปั้น XML สำหรับคิว UFIS_COUNTER_OUT (UFISCHKUD — check-in dedicated counter update).
+	 * ปั้น XML สำหรับคิว UFIS_COUNTER_OUT (UFISCHKUD — check-in dedicated counter
+	 * update).
 	 */
-	public String convertDedicatedCounterToEsb(MSG.MSGSTREAMOUT.INFOBJGENERIC generic, FidsAfttab fidsAfttab, FidsCcatab fidsCcatab) {
+	public String convertDedicatedCounterToEsb(MSG.MSGSTREAMOUT.INFOBJGENERIC generic, FidsAfttab fidsAfttab,
+			FidsCcatab fidsCcatab) {
 		StringWriter writer = new StringWriter();
 		MSG esb = new MSG();
 		MSG.MSGSTREAMOUT msgstreamout = new MSGSTREAMOUT();
 
 		// INFOBJ_GENERIC — dynamic จาก FidsAfttab (identity counter = UFISCHKUD)
-		//MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISCHKUD", updateTime, fidsAfttab);
+		// MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISCHKUD",
+		// updateTime, fidsAfttab);
 
 		MSG.MSGSTREAMOUT.INFOBJCOUNTER counter = new INFOBJCOUNTER();
 
@@ -355,14 +362,14 @@ public class ESBResponseService {
 		counter.setCKBS(fidsCcatab.getCkbs());
 		counter.setCKES(fidsCcatab.getCkes());
 		counter.setDISP(fidsCcatab.getDisp());
-		//Only ESB set switch value.
+		// Only ESB set switch value.
 		String urno = fidsAfttab.getUrno() != null ? fidsAfttab.getUrno().toString() : null;
-    	String flnu = fidsCcatab.getFlnu() != null ? fidsCcatab.getFlnu().toString() : null;
+		String flnu = fidsCcatab.getFlnu() != null ? fidsCcatab.getFlnu().toString() : null;
 		counter.setFLNU(urno);
 		counter.setURNO(flnu);
 		counter.setCTYP(CTYP.valueOf(fidsCcatab.getCtyp()));
-		
-		//sanitizeEmptyToNull(counter);
+
+		// sanitizeEmptyToNull(counter);
 		msgstreamout.setINFOBJCOUNTER(counter);
 		msgstreamout.setINFOBJGENERIC(generic);
 		esb.setMSGSTREAMOUT(msgstreamout);
@@ -377,11 +384,12 @@ public class ESBResponseService {
 		return null;
 	}
 
-
 	/**
-	 * ปั้น XML สำหรับคิว UFIS_COUNTER_OUT (UFISCCIUD — check-in common counter update).
+	 * ปั้น XML สำหรับคิว UFIS_COUNTER_OUT (UFISCCIUD — check-in common counter
+	 * update).
 	 */
-	public String convertCommonCounterToEsb(MSG.MSGSTREAMOUT.INFOBJGENERIC generic, FidsAfttab fidsAfttab, FidsCcatab fidsCcatab) {
+	public String convertCommonCounterToEsb(MSG.MSGSTREAMOUT.INFOBJGENERIC generic, FidsAfttab fidsAfttab,
+			FidsCcatab fidsCcatab) {
 		StringWriter writer = new StringWriter();
 		MSG esb = new MSG();
 		MSG.MSGSTREAMOUT msgstreamout = new MSGSTREAMOUT();
@@ -403,12 +411,13 @@ public class ESBResponseService {
 		// Switch value FLNU / URNO
 		String urno = fidsAfttab.getUrno() != null ? fidsAfttab.getUrno().toString() : null;
 		String flnu = fidsCcatab.getFlnu() != null ? fidsCcatab.getFlnu().toString() : null;
-		
+
 		commonCounter.setFLNU(urno);
 		commonCounter.setURNO(flnu);
-		//sanitizeEmptyToNull(commonCounter);
+		// sanitizeEmptyToNull(commonCounter);
 		// ประกอบโครงสร้างเข้าด้วยกัน
-		// (หมายเหตุ: ถ้า JAXB เจนมาเป็น List ให้ใช้ .getCOMMONCOUNTERS().add(commonCounter))
+		// (หมายเหตุ: ถ้า JAXB เจนมาเป็น List ให้ใช้
+		// .getCOMMONCOUNTERS().add(commonCounter))
 		resources.setCOMMONCOUNTERS(commonCounter);
 		staticNode.setRESOURCES(resources);
 
@@ -428,14 +437,16 @@ public class ESBResponseService {
 	}
 
 	/**
-	 * ส่ง counter เข้าคิว UFIS_COUNTER_OUT_{HOPO} โดย INFOBJ_GENERIC ดึงจาก FidsAfttab
+	 * ส่ง counter เข้าคิว UFIS_COUNTER_OUT_{HOPO} โดย INFOBJ_GENERIC ดึงจาก
+	 * FidsAfttab
 	 */
 	public void sendCounter(String updateTime, FidsAfttab fidsAfttab) {
 		if (fidsAfttab != null && fidsAfttab.getLstFidsCcatab() != null && !fidsAfttab.getLstFidsCcatab().isEmpty()) {
 			for (FidsCcatab item : fidsAfttab.getLstFidsCcatab()) {
 				boolean isCommon = "C".equalsIgnoreCase(item.getCtyp());
 				String msgType = isCommon ? "UFISCCIUD" : "UFISCHKUD";
-            	MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric(msgType, updateTime, fidsAfttab, item.getAction());
+				MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric(msgType, updateTime, fidsAfttab,
+						item.getAction());
 				String xmlEsb;
 				if (isCommon) {
 					xmlEsb = convertCommonCounterToEsb(generic, fidsAfttab, item);
@@ -454,45 +465,51 @@ public class ESBResponseService {
 	/**
 	 * ปั้น XML สำหรับคิว UFIS_GATE_OUT (UFISGTDUD — gate update).
 	 * INFOBJ_GENERIC ดึงจาก FidsAfttab (ดู {@link #buildOutboundGeneric}).
-	 * INFOBJ_GATE เลือก GATEARR/GATEDEP ตาม ADID 
+	 * INFOBJ_GATE เลือก GATEARR/GATEDEP ตาม ADID
 	 */
 	public String convertGatetoEsb(String updateTime, FidsAfttab fidsAfttab) {
 		StringWriter writer = new StringWriter();
 		MSG esb = new MSG();
 		MSG.MSGSTREAMOUT msgstreamout = new MSGSTREAMOUT();
 
-		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISGTDUD", updateTime, fidsAfttab, "delete".equalsIgnoreCase(fidsAfttab.getGateAction())?"update":fidsAfttab.getGateAction());
-		
+		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISGTDUD", updateTime, fidsAfttab,
+				"delete".equalsIgnoreCase(fidsAfttab.getGateAction()) ? "update" : fidsAfttab.getGateAction());
+
 		// --- INFOBJ_GATE: เลือก arr/dep ตาม ADID ---
 		MSG.MSGSTREAMOUT.INFOBJGATE gate = new INFOBJGATE();
-		
+
 		if (generic != null && generic.getADID() == ADID.A) {
 			INFOBJGATE.GATEARR arr = new INFOBJGATE.GATEARR();
 			copyMatchingFields(fidsAfttab.getFieldsNotNull(), fidsAfttab, arr);
-			if("delete".equalsIgnoreCase(fidsAfttab.getGateAction())){
+			if ("delete".equalsIgnoreCase(fidsAfttab.getGateAction())) {
 				arr.setGTA1(" ");
 				arr.setGTA2(" ");
-			}else{
+			} else if ((fidsAfttab.getGta1() != null && !fidsAfttab.getGta1().trim().equalsIgnoreCase(""))
+				|| (fidsAfttab.getGta2() != null && !fidsAfttab.getGta2().trim().equalsIgnoreCase(""))) {
 				arr.setGTA1(formatEmpty(fidsAfttab.getGta1()));
 				arr.setGA1B(formatEmpty(fidsAfttab.getGa1b()));
 				arr.setGA1E(formatEmpty(fidsAfttab.getGa1e()));
 				arr.setGA1X(formatEmpty(fidsAfttab.getGa1x()));
 				arr.setGA1Y(formatEmpty(fidsAfttab.getGa1y()));
+
 				arr.setGTA2(formatEmpty(fidsAfttab.getGta2()));
 				arr.setGA2B(formatEmpty(fidsAfttab.getGa2b()));
 				arr.setGA2E(formatEmpty(fidsAfttab.getGa2e()));
 				arr.setGA2X(formatEmpty(fidsAfttab.getGa2x()));
 				arr.setGA2Y(formatEmpty(fidsAfttab.getGa2y()));
+			} else {
+				return null;
 			}
-			//sanitizeEmptyToNull(arr);
+			// sanitizeEmptyToNull(arr);
 			gate.setGATEARR(arr);
 		} else {
 			INFOBJGATE.GATEDEP dep = new INFOBJGATE.GATEDEP();
 			copyMatchingFields(fidsAfttab.getFieldsNotNull(), fidsAfttab, dep);
-			if("delete".equalsIgnoreCase(fidsAfttab.getGateAction())){
+			if ("delete".equalsIgnoreCase(fidsAfttab.getGateAction())) {
 				dep.setGTD1(" ");
 				dep.setGTD2(" ");
-			}else{
+			} else if ((fidsAfttab.getGtd1() != null && !fidsAfttab.getGtd1().trim().equalsIgnoreCase(""))
+				|| (fidsAfttab.getGtd2() != null && !fidsAfttab.getGtd2().trim().equalsIgnoreCase(""))) {
 				dep.setGTD1(formatEmpty(fidsAfttab.getGtd1()));
 				dep.setGD1B(formatEmpty(fidsAfttab.getGd1b()));
 				dep.setGD1E(formatEmpty(fidsAfttab.getGd1e()));
@@ -504,8 +521,10 @@ public class ESBResponseService {
 				dep.setGD2E(formatEmpty(fidsAfttab.getGd2e()));
 				dep.setGD2X(formatEmpty(fidsAfttab.getGd2x()));
 				dep.setGD2Y(formatEmpty(fidsAfttab.getGd2y()));
+			} else {
+				return null;
 			}
-			//sanitizeEmptyToNull(dep);
+			// sanitizeEmptyToNull(dep);
 			gate.setGATEDEP(dep);
 		}
 
@@ -529,7 +548,7 @@ public class ESBResponseService {
 	}
 
 	/**
-	 * ส่ง gate เข้าคิว UFIS_GATE_OUT_{HOPO}; 
+	 * ส่ง gate เข้าคิว UFIS_GATE_OUT_{HOPO};
 	 */
 	public void sendGate(String updateTime, FidsAfttab fidsAfttab) {
 		if (fidsAfttab != null && fidsAfttab.getGateAction() != null) {
@@ -550,32 +569,38 @@ public class ESBResponseService {
 		MSG esb = new MSG();
 		MSG.MSGSTREAMOUT msgstreamout = new MSGSTREAMOUT();
 
-		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISBLTUD", updateTime, fidsAfttab, "delete".equalsIgnoreCase(fidsAfttab.getBeltAction())?"update":fidsAfttab.getBeltAction());
+		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISBLTUD", updateTime, fidsAfttab,
+				"delete".equalsIgnoreCase(fidsAfttab.getBeltAction()) ? "update" : fidsAfttab.getBeltAction());
 
 		// --- INFOBJ_BELT
 		MSG.MSGSTREAMOUT.INFOBJBELT belt = new INFOBJBELT();
-		/* belt.setBLT1("");
-		belt.setB1BS("");
-		belt.setB1ES(""); */
+		/*
+		 * belt.setBLT1("");
+		 * belt.setB1BS("");
+		 * belt.setB1ES("");
+		 */
 		copyMatchingFields(fidsAfttab.getFieldsNotNull(), fidsAfttab, belt);
-		if("delete".equalsIgnoreCase(fidsAfttab.getBeltAction())){
+		if ("delete".equalsIgnoreCase(fidsAfttab.getBeltAction())) {
 			belt.setBLT1(" ");
 			belt.setBLT2(" ");
-		}else{
+		} else if ((fidsAfttab.getBlt1() != null && !fidsAfttab.getBlt1().trim().equalsIgnoreCase(""))
+				|| (fidsAfttab.getBlt2() != null && !fidsAfttab.getBlt2().trim().equalsIgnoreCase(""))) {
 			belt.setBLT1(formatEmpty(fidsAfttab.getBlt1()));
 			belt.setB1BS(formatEmpty(fidsAfttab.getB1bs()));
-        	belt.setB1ES(formatEmpty(fidsAfttab.getB1es()));
+			belt.setB1ES(formatEmpty(fidsAfttab.getB1es()));
 			belt.setB1BA(formatEmpty(fidsAfttab.getB1ba()));
 			belt.setB1EA(formatEmpty(fidsAfttab.getB1ea()));
-			
+
 			belt.setBLT2(formatEmpty(fidsAfttab.getBlt2()));
 			belt.setB2BS(formatEmpty(fidsAfttab.getB2bs()));
 			belt.setB2ES(formatEmpty(fidsAfttab.getB2es()));
 			belt.setB2BA(formatEmpty(fidsAfttab.getB2ba()));
 			belt.setB2EA(formatEmpty(fidsAfttab.getB2ea()));
+		} else {
+			return null;
 		}
-		//sanitizeEmptyToNull(belt);
-		
+		// sanitizeEmptyToNull(belt);
+
 		if (!hasAnyData(belt)) {
 			return null;
 		}
@@ -611,47 +636,52 @@ public class ESBResponseService {
 	 * ปั้น XML สำหรับคิว UFIS_ACPOSITION_OUT (UFISPOSUD — aircraft position/stand
 	 * update).
 	 * INFOBJ_GENERIC ดึงจาก FidsAfttab (ดู {@link #buildOutboundGeneric}).
-	 * INFOBJ_ACPOSITION เลือก ACPOSITIONARR/ACPOSITIONDEP ตาม ADID 
+	 * INFOBJ_ACPOSITION เลือก ACPOSITIONARR/ACPOSITIONDEP ตาม ADID
 	 */
 	public String convertAcpositiontoEsb(String updateTime, FidsAfttab fidsAfttab) {
 		StringWriter writer = new StringWriter();
 		MSG esb = new MSG();
 		MSG.MSGSTREAMOUT msgstreamout = new MSGSTREAMOUT();
 
-		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISPOSUD", updateTime, fidsAfttab, "delete".equalsIgnoreCase(fidsAfttab.getPositionAction())?"update":fidsAfttab.getPositionAction());
-	
+		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISPOSUD", updateTime, fidsAfttab,
+				"delete".equalsIgnoreCase(fidsAfttab.getPositionAction()) ? "update" : fidsAfttab.getPositionAction());
+
 		// --- INFOBJ_ACPOSITION: เลือก arr/dep ตาม ADID
 		MSG.MSGSTREAMOUT.INFOBJACPOSITION pos = new INFOBJACPOSITION();
 		if (generic.getADID() == ADID.A) {
 			INFOBJACPOSITION.ACPOSITIONARR arr = new INFOBJACPOSITION.ACPOSITIONARR();
 			copyMatchingFields(fidsAfttab.getFieldsNotNull(), fidsAfttab, arr);
-			if("delete".equalsIgnoreCase(fidsAfttab.getPositionAction())){
+			if ("delete".equalsIgnoreCase(fidsAfttab.getPositionAction())) {
 				arr.setPSTA(" ");
-			}else{
+			} else if (fidsAfttab.getPsta() != null && !fidsAfttab.getPsta().trim().equalsIgnoreCase("")) {
 				arr.setPSTA(formatEmpty(fidsAfttab.getPsta()));
 				arr.setPABA(formatEmpty(fidsAfttab.getPaba()));
 				arr.setPAEA(formatEmpty(fidsAfttab.getPaea()));
 				arr.setPABS(formatEmpty(fidsAfttab.getPabs()));
 				arr.setPAES(formatEmpty(fidsAfttab.getPaes()));
+			}else{
+				return null;
 			}
-			//sanitizeEmptyToNull(arr);
+			// sanitizeEmptyToNull(arr);
 			pos.setACPOSITIONARR(arr);
 		} else {
 			INFOBJACPOSITION.ACPOSITIONDEP dep = new INFOBJACPOSITION.ACPOSITIONDEP();
 			copyMatchingFields(fidsAfttab.getFieldsNotNull(), fidsAfttab, dep);
-			if("delete".equalsIgnoreCase(fidsAfttab.getPositionAction())){
+			if ("delete".equalsIgnoreCase(fidsAfttab.getPositionAction())) {
 				dep.setPSTD(" ");
-			}else{
+			} else if (fidsAfttab.getPstd() != null && !fidsAfttab.getPstd().trim().equalsIgnoreCase("")) {
 				dep.setPSTD(formatEmpty(fidsAfttab.getPstd()));
 				dep.setPDBA(formatEmpty(fidsAfttab.getPdba()));
 				dep.setPDEA(formatEmpty(fidsAfttab.getPdea()));
 				dep.setPDBS(formatEmpty(fidsAfttab.getPdbs()));
 				dep.setPDES(formatEmpty(fidsAfttab.getPdes()));
+			}else{
+				return null;
 			}
-			//sanitizeEmptyToNull(dep);
+			// sanitizeEmptyToNull(dep);
 			pos.setACPOSITIONDEP(dep);
 		}
-		
+
 		if (!hasAnyData(pos)) {
 			return null;
 		}
@@ -693,27 +723,32 @@ public class ESBResponseService {
 		MSG esb = new MSG();
 		MSG.MSGSTREAMOUT msgstreamout = new MSGSTREAMOUT();
 
-		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISVDGUD", updateTime, fidsAfttab, fidsAfttab.getAction());
+		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISVDGUD", updateTime, fidsAfttab,
+				fidsAfttab.getAction());
 
 		// --- INFOBJ_VDGS: เลือก arr/dep ตาม ADID, field ค่าว่าง "" (รอ backend map)
 		// ---
 		MSG.MSGSTREAMOUT.INFOBJVDGS vdgs = new INFOBJVDGS();
 		if (generic.getADID() == ADID.A) {
 			INFOBJVDGS.VDGSARR arr = new INFOBJVDGS.VDGSARR();
-			/* arr.setPSTA("");
-			arr.setACT5("");
-			arr.setFTYP(""); */
+			/*
+			 * arr.setPSTA("");
+			 * arr.setACT5("");
+			 * arr.setFTYP("");
+			 */
 			copyMatchingFields(fidsAfttab.getFieldsNotNull(), fidsAfttab, arr);
-			//sanitizeEmptyToNull(arr);
+			// sanitizeEmptyToNull(arr);
 			vdgs.setVDGSARR(arr);
 		} else {
 			INFOBJVDGS.VDGSDEP dep = new INFOBJVDGS.VDGSDEP();
-			/* dep.setPSTD("");
-			dep.setACT5("");
-			dep.setFTYP("");
-			dep.setTIFD(""); */
+			/*
+			 * dep.setPSTD("");
+			 * dep.setACT5("");
+			 * dep.setFTYP("");
+			 * dep.setTIFD("");
+			 */
 			copyMatchingFields(fidsAfttab.getFieldsNotNull(), fidsAfttab, dep);
-			//sanitizeEmptyToNull(dep);
+			// sanitizeEmptyToNull(dep);
 			vdgs.setVDGSDEP(dep);
 		}
 
@@ -754,7 +789,8 @@ public class ESBResponseService {
 		MSG esb = new MSG();
 		MSG.MSGSTREAMOUT msgstreamout = new MSGSTREAMOUT();
 
-		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISTOWUD", updateTime, fidsAfttab, fidsAfttab.getAction());
+		MSG.MSGSTREAMOUT.INFOBJGENERIC generic = buildOutboundGeneric("UFISTOWUD", updateTime, fidsAfttab,
+				fidsAfttab.getAction());
 
 		// --- CONCAT/TOWINGS: ยังไม่มี source ใน FidsAfttab → ค่าว่าง "" (รอ backend
 		// map) ---
@@ -877,30 +913,33 @@ public class ESBResponseService {
 		generic.setMESSAGEORIGIN("AOS");
 		generic.setTIMEID(TIMEID.UTC);
 		generic.setTIMESTAMP(updateTime);
-		generic.setACTIONTYPE(action.equalsIgnoreCase("insert") ? ACTIONTYPE.I : action.equalsIgnoreCase("update") ? ACTIONTYPE.U : ACTIONTYPE.D);
+		generic.setACTIONTYPE(action.equalsIgnoreCase("insert") ? ACTIONTYPE.I
+				: action.equalsIgnoreCase("update") ? ACTIONTYPE.U : ACTIONTYPE.D);
 		generic.setHOPO(fidsAfttab.getHopo());
 
-		if(!"UFISCCIUD".equalsIgnoreCase(messageType)){
+		if (!"UFISCCIUD".equalsIgnoreCase(messageType)) {
 			generic.setURNO(fidsAfttab.getUrno() != null ? fidsAfttab.getUrno().toString() : null);
 			generic.setADID(ADID.valueOf(fidsAfttab.getAdid()));
 			generic.setSTDT(generic.getADID() == ADID.A ? fidsAfttab.getStoa() : fidsAfttab.getStod());
 			generic.setRKEY(fidsAfttab.getRkey() != null ? fidsAfttab.getRkey().toString() : null);
 			generic.setRTYP(fidsAfttab.getRtyp());
-			
-			if(!"D".equals(fidsAfttab.getFtyp())){
+
+			if (!"D".equals(fidsAfttab.getFtyp())) {
 				String flno = fidsAfttab.getFlno().trim();
 				if (flno != null && !flno.isEmpty()) {
 					Map<String, String> parts = tranformFidsAfttab.parseFlightNumber(flno);
 					String newFlno = tranformFidsAfttab.toFlnoNonSuffix(parts).trim();
 					generic.setFLNO(newFlno);
-					if(!flno.equals(newFlno)){
+					if (!flno.equals(newFlno)) {
 						String csgn = fidsAfttab.getCsgn();
-						if(csgn != null && csgn.length() > 0){
+						if (csgn != null && csgn.length() > 0) {
 							generic.setCSGN(csgn.substring(0, csgn.length() - 1));
 						}
+					}else{
+						generic.setCSGN(fidsAfttab.getCsgn());
 					}
 				}
-			}else{
+			} else {
 				generic.setFLNO(fidsAfttab.getFlno() != null ? fidsAfttab.getFlno().trim() : null);
 				generic.setCSGN(fidsAfttab.getCsgn());
 			}
@@ -924,12 +963,14 @@ public class ESBResponseService {
 						if (!((String) value).isEmpty()) {
 							return true; // เจอข้อมูลแล้ว
 						}
-					} 
-					// 2. ถ้าเป็น Data Type พื้นฐาน (Primitive / Wrapper / Enum / Date / Number) ถือว่ามีข้อมูลทันที
+					}
+					// 2. ถ้าเป็น Data Type พื้นฐาน (Primitive / Wrapper / Enum / Date / Number)
+					// ถือว่ามีข้อมูลทันที
 					else if (isPrimitiveOrWrapper(value.getClass()) || value instanceof Enum<?>) {
 						return true;
 					}
-					// 3. ถ้าเป็น Custom DTO Object ซ้อนข้างใน (เช่น GATEARR / GATEDEP) ค่อยลงไปเช็ก Recursive
+					// 3. ถ้าเป็น Custom DTO Object ซ้อนข้างใน (เช่น GATEARR / GATEDEP) ค่อยลงไปเช็ก
+					// Recursive
 					else if (hasAnyData(value)) {
 						return true;
 					}
@@ -943,11 +984,11 @@ public class ESBResponseService {
 
 	// Helper method เช็กว่าเป็น Class พื้นฐานหรือไม่
 	private boolean isPrimitiveOrWrapper(Class<?> clazz) {
-		return clazz.isPrimitive() 
-			|| Number.class.isAssignableFrom(clazz) 
-			|| Boolean.class.isAssignableFrom(clazz) 
-			|| Character.class.isAssignableFrom(clazz)
-			|| java.util.Date.class.isAssignableFrom(clazz);
+		return clazz.isPrimitive()
+				|| Number.class.isAssignableFrom(clazz)
+				|| Boolean.class.isAssignableFrom(clazz)
+				|| Character.class.isAssignableFrom(clazz)
+				|| java.util.Date.class.isAssignableFrom(clazz);
 	}
 
 	/**
@@ -994,39 +1035,43 @@ public class ESBResponseService {
 		}
 	}
 
-	/* public void callWebserviceResponse(String xmlEsb) {
-		// Create SOAP Connection
-		SOAPConnectionFactory soapConnectionFactory;
-		try {
-			soapConnectionFactory = SOAPConnectionFactory.newInstance();
-
-			SOAPConnection soapConnection = soapConnectionFactory.createConnection();
-
-			// Define the endpoint URL
-			String url = "http://esbv10:5555/ws/IFIMS.Service.CommonService:BKK_IFIMS_MessageResponse_WSD/IFIMS_Service_CommonService_BKK_IFIMS_MessageResponse_WSD_Port";
-
-			// Create the SOAP Request
-			SOAPMessage soapRequest = createSoapRequest(xmlEsb, url, "BKK_IFIMS_MessageResponse");
-
-			// Send request and receive response
-			SOAPMessage soapResponse = soapConnection.call(soapRequest, url);
-
-			// Print response
-			// System.out.println("Response SOAP Message:");
-			// soapResponse.writeTo(System.out);
-
-			soapConnection.close();
-		} catch (UnsupportedOperationException e) {
-			log.error("callWebserviceResponse: ", e);
-			// e.printStackTrace();
-		} catch (SOAPException e) {
-			log.error("callWebserviceResponse: ", e);
-			// e.printStackTrace();
-		} catch (Exception e) {
-			log.error("callWebserviceResponse: ", e);
-			// e.printStackTrace();
-		}
-	} */
+	/*
+	 * public void callWebserviceResponse(String xmlEsb) {
+	 * // Create SOAP Connection
+	 * SOAPConnectionFactory soapConnectionFactory;
+	 * try {
+	 * soapConnectionFactory = SOAPConnectionFactory.newInstance();
+	 * 
+	 * SOAPConnection soapConnection = soapConnectionFactory.createConnection();
+	 * 
+	 * // Define the endpoint URL
+	 * String url =
+	 * "http://esbv10:5555/ws/IFIMS.Service.CommonService:BKK_IFIMS_MessageResponse_WSD/IFIMS_Service_CommonService_BKK_IFIMS_MessageResponse_WSD_Port";
+	 * 
+	 * // Create the SOAP Request
+	 * SOAPMessage soapRequest = createSoapRequest(xmlEsb, url,
+	 * "BKK_IFIMS_MessageResponse");
+	 * 
+	 * // Send request and receive response
+	 * SOAPMessage soapResponse = soapConnection.call(soapRequest, url);
+	 * 
+	 * // Print response
+	 * // System.out.println("Response SOAP Message:");
+	 * // soapResponse.writeTo(System.out);
+	 * 
+	 * soapConnection.close();
+	 * } catch (UnsupportedOperationException e) {
+	 * log.error("callWebserviceResponse: ", e);
+	 * // e.printStackTrace();
+	 * } catch (SOAPException e) {
+	 * log.error("callWebserviceResponse: ", e);
+	 * // e.printStackTrace();
+	 * } catch (Exception e) {
+	 * log.error("callWebserviceResponse: ", e);
+	 * // e.printStackTrace();
+	 * }
+	 * }
+	 */
 
 	public void callWebserviceUpdate(String xmlEsb) {
 		// Create SOAP Connection
@@ -1101,7 +1146,7 @@ public class ESBResponseService {
 		try {
 			MimeMessage message = new MimeMessage(session);
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
-			message.setSubject("NACK - Error during process "+hopo+" AODB inbound message");
+			message.setSubject("NACK - Error during process " + hopo + " AODB inbound message");
 			message.setFrom(new InternetAddress(fromEmail, "iFIMSConnect", "UTF-8"));
 
 			// ส่งเนื้อหา XML เข้าไปใน Body ของอีเมล
@@ -1133,20 +1178,20 @@ public class ESBResponseService {
 				sourceField.setAccessible(true);
 				try {
 					Object value = sourceField.get(source);
-					
+
 					// เช็กว่า value มีค่า และชื่อฟิลด์อยู่ใน updateFields หรือไม่
 					if (value != null && isFieldInUpdateList(safeUpdateFields, sourceField.getName())) {
-						
+
 						// ค้นหา Target Field แบบ Case-Insensitive เผื่อ JAXB เจนชื่อตัวพิมพ์ต่างกัน
 						Field targetField = findTargetField(targetClass, sourceField.getName());
-						
+
 						if (targetField != null) {
 							targetField.setAccessible(true);
-							
+
 							Object spaceValue = value;
 							if (value instanceof String) {
 								String strVal = (String) value;
-								if (strVal.isEmpty()) { 
+								if (strVal.isEmpty()) {
 									spaceValue = " "; // แปลกค่าจาก "" เป็น 1 Space
 								}
 							}
@@ -1154,7 +1199,7 @@ public class ESBResponseService {
 							// กรณี Type เดียวกันเป๊ะ
 							if (targetField.getType().equals(sourceField.getType())) {
 								targetField.set(target, spaceValue);
-							} 
+							}
 							// กรณี Target เป็น String แต่ Source เป็นประเภทอื่น (ให้สั่ง toString())
 							else if (targetField.getType().equals(String.class)) {
 								targetField.set(target, spaceValue.toString());
@@ -1194,7 +1239,8 @@ public class ESBResponseService {
 	}
 
 	private <T> T sanitizeEmptyToNull(T object) {
-		if (object == null) return null;
+		if (object == null)
+			return null;
 
 		for (Field field : object.getClass().getDeclaredFields()) {
 			if (field.getType().equals(String.class)) {
@@ -1202,7 +1248,7 @@ public class ESBResponseService {
 				try {
 					String value = (String) field.get(object);
 					if (value != null && value.trim().isEmpty()) {
-						field.set(object, null); // เปลี่ยน "" หรือ "   " ให้เป็น null
+						field.set(object, null); // เปลี่ยน "" หรือ " " ให้เป็น null
 					}
 				} catch (IllegalAccessException e) {
 					log.error("Error sanitizing field: {}", field.getName(), e);

@@ -41,10 +41,10 @@ class ESBResponseServiceTest {
         when(tranformFidsAfttab.parseFlightNumber(anyString())).thenAnswer(invocation -> {
             Map<String, String> map = new HashMap<>();
             map.put("carrier", "PG");
-            map.put("number", "2512");
+            map.put("number", "2512D");
             return map;
         });
-        when(tranformFidsAfttab.toFlnoNonSuffix(any())).thenReturn("PG2512");
+        when(tranformFidsAfttab.toFlnoNonSuffix(any())).thenReturn("PG 2512");
 
         // 3. ส่ง mock เข้าไปที่ Parameter ลำดับที่ 2 (tranformFidsAfttab)
         service = new ESBResponseService(
@@ -89,7 +89,8 @@ class ESBResponseServiceTest {
 		fidsAfttab.setAction("UPDATE");
 		fidsAfttab.setGateAction("insert");
 		fidsAfttab.setAdid("A");
-		fidsAfttab.setFlno("PG136");
+		fidsAfttab.setFlno("PG2512D");
+		fidsAfttab.setCsgn("THA2512D");
 		fidsAfttab.setGta1("A3");
 		fidsAfttab.setGa1b("20260916083400");
 		fidsAfttab.setGa1e("20260916084900");
@@ -102,6 +103,8 @@ class ESBResponseServiceTest {
 		// 3. Assert
 		assertThat(xmlResult).isNotNull();
 		assertThat(xmlResult).contains("<ACTIONTYPE>I</ACTIONTYPE>");
+		assertThat(xmlResult).contains("<FLNO>PG 2512</FLNO>");
+		assertThat(xmlResult).contains("<CSGN>THA2512</CSGN>");
 		assertThat(xmlResult).contains("<GATEARR>");
 		assertThat(xmlResult).contains("<GTA1>A3</GTA1>");
 		assertThat(xmlResult).contains("<GTA2> </GTA2>"); // เคส insert จะต้องถูก set เว้นวรรคใน GTA2
@@ -120,7 +123,7 @@ class ESBResponseServiceTest {
 		fidsAfttab.setAction("UPDATE");
 		fidsAfttab.setGateAction("update");
 		fidsAfttab.setAdid("A");
-		fidsAfttab.setFlno("PG136");
+		fidsAfttab.setFlno("PG2512");
 		fidsAfttab.setGta1("A1");
 		fidsAfttab.setGa1b("20260916100000");
 		fidsAfttab.setGa1e("20260916100000");
@@ -158,7 +161,7 @@ class ESBResponseServiceTest {
 		fidsAfttab.setAction("UPDATE");
 		fidsAfttab.setGateAction("update");
 		fidsAfttab.setAdid("D");
-		fidsAfttab.setFlno("PG136");
+		fidsAfttab.setFlno("PG2512");
 		fidsAfttab.setGtd1("A3");
 		
 		fidsAfttab.setFieldsNotNull(Arrays.asList("gtd1"));
@@ -175,6 +178,27 @@ class ESBResponseServiceTest {
 	}
 
 	@Test
+	@DisplayName("convertGatetoEsb (Update Gate) - GTA1 and GTA2 HOLD")
+	void convertGatetoEsb_UpdateGate2() {
+		// 1. Arrange: ปรับปรุง Gate ที่มีอยู่เดิม (Gate Action = update)
+		FidsAfttab fidsAfttab = new FidsAfttab();
+		fidsAfttab.setAction("UPDATE");
+		fidsAfttab.setGateAction("update");
+		fidsAfttab.setAdid("D");
+		fidsAfttab.setFlno("PG136");
+		fidsAfttab.setGtd1(" ");
+		fidsAfttab.setGtd2(" ");
+		
+		fidsAfttab.setFieldsNotNull(Arrays.asList("gtd1"));
+
+		// 2. Act
+		String xmlResult = service.convertGatetoEsb("2026-09-16T07:25:59Z", fidsAfttab);
+
+		// 3. Assert
+		assertThat(xmlResult).isNull();
+	}
+
+	@Test
 	@DisplayName("convertGatetoEsb (Delete Gate) - GTA1 and GTA2 set to space")
 	void convertGatetoEsb_DeleteGate() {
 		// 1. Arrange: ลบ Gate เดิมออกเป็น HOLD (Gate Action = delete)
@@ -182,7 +206,7 @@ class ESBResponseServiceTest {
 		fidsAfttab.setAction("UPDATE");
 		fidsAfttab.setGateAction("delete");
 		fidsAfttab.setAdid("A");
-		fidsAfttab.setFlno("PG136");
+		fidsAfttab.setFlno("PG2512");
 		
 		fidsAfttab.setFieldsNotNull(Arrays.asList("gateAction"));
 
@@ -208,7 +232,7 @@ class ESBResponseServiceTest {
 		fidsAfttab.setAction("UPDATE");
 		fidsAfttab.setGateAction(null); // จำลองสถานการณ์กรณี XSLT คืนค่าเป็น null (none action)
 		fidsAfttab.setAdid("A");
-		fidsAfttab.setFlno("PG136");
+		fidsAfttab.setFlno("PG2512");
 		fidsAfttab.setHopo("BKK");
 
 		// 2. Act: เรียกใช้ sendGate
@@ -319,6 +343,30 @@ class ESBResponseServiceTest {
 		.contains("<B1BA>20260916090000</B1BA>").contains("<B1EA>20260916100000</B1EA>")
 		.contains("<B2BS> </B2BS>").contains("<B2ES> </B2ES>")
 		.contains("<B2BA> </B2BA>").contains("<B2EA> </B2EA>");
+	}
+	
+	@Test
+	@DisplayName("convertBelttoEsb (Update Belt) - BLT1 and BLT2 HOLD")
+	void convertBelttoEsb_UpdateBelt2() {
+		// 1. Arrange: ปรับปรุง Belt ที่มีอยู่เดิม (Belt Action = update)
+		FidsAfttab fidsAfttab = new FidsAfttab();
+		fidsAfttab.setAction("UPDATE");
+		fidsAfttab.setBeltAction("update");
+		fidsAfttab.setAdid("A");
+		fidsAfttab.setFlno("PG136");
+		fidsAfttab.setBlt1(" ");  
+		fidsAfttab.setB1bs("20260821090000");
+		fidsAfttab.setB1es("20260821090000");  
+		fidsAfttab.setB1ba("20260916090000");
+		fidsAfttab.setB1ea("20260916100000");
+		
+		fidsAfttab.setFieldsNotNull(Arrays.asList("blt1"));
+
+		// 2. Act
+		String xmlResult = service.convertBelttoEsb("2026-09-16T07:25:59Z", fidsAfttab);
+
+		// 3. Assert
+		assertThat(xmlResult).isNull();
 	}
 
 	@Test
@@ -452,6 +500,28 @@ class ESBResponseServiceTest {
 		assertThat(xmlResult).contains("<PDEA>20260916113000</PDEA>");
 		assertThat(xmlResult).contains("<PDBS> </PDBS>");
 		assertThat(xmlResult).contains("<PDES> </PDES>");
+	}
+
+	@Test
+	@DisplayName("convertAcpositiontoEsb (Update Position Departure) - PSTD HOLD")
+	void convertAcpositiontoEsb_UpdatePosition1() {
+		// 1. Arrange: ปรับปรุง Position ขาออก (Position Action = update, ADID = D)
+		FidsAfttab fidsAfttab = new FidsAfttab();
+		fidsAfttab.setAction("UPDATE");
+		fidsAfttab.setPositionAction("update");
+		fidsAfttab.setAdid("D");
+		fidsAfttab.setFlno("PG136");
+		fidsAfttab.setPstd(" ");
+		fidsAfttab.setPdba("20260916110000");
+		fidsAfttab.setPdea("20260916113000");
+		
+		fidsAfttab.setFieldsNotNull(Arrays.asList("pstd", "pdba", "pdea"));
+
+		// 2. Act
+		String xmlResult = service.convertAcpositiontoEsb("2026-09-16T07:25:59Z", fidsAfttab);
+
+		// 3. Assert
+		assertThat(xmlResult).isNull();
 	}
 
 	@Test
